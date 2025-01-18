@@ -147,14 +147,10 @@ changeStatusButton.addEventListener("click", (event) => {
 
   const status = document.getElementById("newStatus").value;
 
-  console.log(currentBook.status);
-
   if (currentBook && currentBookRow) {
     currentBook.setBookStatus(status);
     currentBookRow.cells[3].textContent = status;
   }
-
-  console.log(currentBook.status);
 
   statusForm.close();
 });
