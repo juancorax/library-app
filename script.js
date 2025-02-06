@@ -1,4 +1,95 @@
-const myLibrary = [];
+class Book {
+  constructor(title, author, pages, status) {
+    this.title = title;
+    this.author = author;
+    this.pages = pages;
+    this.status = status;
+  }
+}
+
+class Library {
+  #myLibrary = [];
+
+  currentBook = null;
+  currentBookRow = null;
+
+  addBook(newBook) {
+    this.#myLibrary.push(newBook);
+  }
+
+  updateTableDisplay() {
+    const table = document.querySelector("table");
+    const tableBody = table.querySelector("tbody");
+
+    if (tableBody.children.length === 0) {
+      table.style.display = "none";
+    } else {
+      table.style.display = "table";
+    }
+  }
+
+  displayBook(book) {
+    const tableBody = document.querySelector("tbody");
+
+    const tableRow = tableBody.insertRow();
+    tableRow.setAttribute("data-index", this.#myLibrary.length - 1);
+
+    for (const key in book) {
+      if (book.hasOwnProperty(key)) {
+        const cell = tableRow.insertCell();
+        cell.textContent = book[key];
+      }
+    }
+
+    const changeStatusCell = tableRow.insertCell();
+    const showStatusFormButton = document.createElement("button");
+    showStatusFormButton.textContent = "Change Status";
+
+    showStatusFormButton.addEventListener("click", () => {
+      this.currentBook = book;
+      this.currentBookRow = tableRow;
+
+      const status = document.getElementById("newStatus");
+      status.value = tableRow.cells[3].textContent;
+
+      statusForm.showModal();
+    });
+
+    changeStatusCell.appendChild(showStatusFormButton);
+
+    const removeBookCell = tableRow.insertCell();
+
+    const removeBookButton = document.createElement("button");
+    removeBookButton.textContent = "Remove";
+
+    removeBookButton.addEventListener("click", () => {
+      const rowIndex = Number(tableRow.dataset.index);
+
+      this.#myLibrary.splice(rowIndex, 1);
+      tableBody.removeChild(tableRow);
+
+      if (rowIndex !== this.#myLibrary.length) {
+        const rows = tableBody.rows;
+
+        for (let i = rowIndex; i < rows.length; i++) {
+          rows[i].dataset.index = String(i);
+        }
+      }
+
+      this.updateTableDisplay();
+    });
+
+    removeBookCell.appendChild(removeBookButton);
+  }
+
+  displayAllBooks() {
+    const tableBody = document.querySelector("tbody");
+    tableBody.innerHTML = "";
+
+    this.#myLibrary.forEach(this.displayBook);
+    this.updateTableDisplay();
+  }
+}
 
 const form = document.getElementById("form");
 const showFormButton = document.getElementById("showFormButton");
@@ -8,93 +99,6 @@ const addBookButton = document.getElementById("addBookButton");
 const statusForm = document.getElementById("statusForm");
 const closeStatusFormButton = document.getElementById("closeStatusFormButton");
 const changeStatusButton = document.getElementById("changeStatusButton");
-
-let currentBook = null;
-let currentBookRow = null;
-
-function Book(title, author, pages, status) {
-  this.title = title;
-  this.author = author;
-  this.pages = pages;
-  this.status = status;
-}
-
-Book.prototype.setBookStatus = function (newStatus) {
-  this.status = newStatus;
-};
-
-function updateTableDisplay() {
-  const table = document.querySelector("table");
-  const tableBody = table.querySelector("tbody");
-
-  if (tableBody.children.length === 0) {
-    table.style.display = "none";
-  } else {
-    table.style.display = "table";
-  }
-}
-
-function displayBook(book) {
-  const tableBody = document.querySelector("tbody");
-
-  const tableRow = tableBody.insertRow();
-  tableRow.setAttribute("data-index", myLibrary.length - 1);
-
-  for (const key in book) {
-    if (book.hasOwnProperty(key)) {
-      const cell = tableRow.insertCell();
-      cell.textContent = book[key];
-    }
-  }
-
-  const changeStatusCell = tableRow.insertCell();
-  const showStatusFormButton = document.createElement("button");
-  showStatusFormButton.textContent = "Change Status";
-
-  showStatusFormButton.addEventListener("click", () => {
-    currentBook = book;
-    currentBookRow = tableRow;
-
-    const status = document.getElementById("newStatus");
-    status.value = tableRow.cells[3].textContent;
-
-    statusForm.showModal();
-  });
-
-  changeStatusCell.appendChild(showStatusFormButton);
-
-  const removeBookCell = tableRow.insertCell();
-
-  const removeBookButton = document.createElement("button");
-  removeBookButton.textContent = "Remove";
-
-  removeBookButton.addEventListener("click", () => {
-    const rowIndex = Number(tableRow.dataset.index);
-
-    myLibrary.splice(rowIndex, 1);
-    tableBody.removeChild(tableRow);
-
-    if (rowIndex !== myLibrary.length) {
-      const rows = tableBody.rows;
-
-      for (let i = rowIndex; i < rows.length; i++) {
-        rows[i].dataset.index = String(i);
-      }
-    }
-
-    updateTableDisplay();
-  });
-
-  removeBookCell.appendChild(removeBookButton);
-}
-
-function displayAllBooks() {
-  const tableBody = document.querySelector("tbody");
-  tableBody.innerHTML = "";
-
-  myLibrary.forEach(displayBook);
-  updateTableDisplay();
-}
 
 showFormButton.addEventListener("click", () => {
   form.showModal();
@@ -123,10 +127,10 @@ addBookButton.addEventListener("click", (event) => {
   }
 
   const newBook = new Book(title, author, Number(pages), status);
-  myLibrary.push(newBook);
+  library.addBook(newBook);
 
-  displayBook(newBook);
-  updateTableDisplay();
+  library.displayBook(newBook);
+  library.updateTableDisplay();
 
   document.getElementById("title").value = "";
   document.getElementById("author").value = "";
@@ -147,12 +151,13 @@ changeStatusButton.addEventListener("click", (event) => {
 
   const status = document.getElementById("newStatus").value;
 
-  if (currentBook && currentBookRow) {
-    currentBook.setBookStatus(status);
-    currentBookRow.cells[3].textContent = status;
+  if (library.currentBook && library.currentBookRow) {
+    library.currentBook.status = status;
+    library.currentBookRow.cells[3].textContent = status;
   }
 
   statusForm.close();
 });
 
-displayAllBooks();
+const library = new Library();
+library.displayAllBooks();
