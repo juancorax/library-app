@@ -13,8 +13,35 @@ class Library {
   currentBook = null;
   currentBookRow = null;
 
-  addBook(newBook) {
+  showFormFieldError(field) {
+    const errorMessage = document.querySelector(`#${field.id} + span.error`);
+
+    if (field.validity.valueMissing) {
+      errorMessage.textContent = `${field.id} required`;
+    } else if (field.validity.tooShort) {
+      errorMessage.textContent = `should be at least ${field.minLength} characters`;
+    } else if (field.type === "number" && field.value === "") {
+      errorMessage.textContent = `needs to be a number`;
+    } else if (field.validity.rangeUnderflow) {
+      errorMessage.textContent = `minimum: ${field.min} page(s)`;
+    }
+  }
+
+  clearFormFields() {
+    formFields.forEach((field) => {
+      field.value = "";
+
+      const errorMessage = document.querySelector(`#${field.id} + span.error`);
+      errorMessage.textContent = "";
+    });
+  }
+
+  addBook([title, author, pages, status]) {
+    const newBook = new Book(title, author, pages, status);
     this.#myLibrary.push(newBook);
+
+    this.displayBook(newBook);
+    this.updateTableDisplay();
   }
 
   updateTableDisplay() {
@@ -100,6 +127,24 @@ const statusForm = document.getElementById("statusForm");
 const closeStatusFormButton = document.getElementById("closeStatusFormButton");
 const changeStatusButton = document.getElementById("changeStatusButton");
 
+const formFields = [
+  document.getElementById("title"),
+  document.getElementById("author"),
+  document.getElementById("pages"),
+  document.getElementById("status"),
+];
+
+formFields.forEach((field) => {
+  field.addEventListener("input", () => {
+    if (field.validity.valid) {
+      const errorMessage = document.querySelector(`#${field.id} + span.error`);
+      errorMessage.textContent = "";
+    } else {
+      library.showFormFieldError(field);
+    }
+  });
+});
+
 showFormButton.addEventListener("click", () => {
   form.showModal();
 });
@@ -108,36 +153,27 @@ closeFormButton.addEventListener("click", (event) => {
   event.preventDefault();
 
   form.close();
+  library.clearFormFields();
 });
 
 addBookButton.addEventListener("click", (event) => {
   event.preventDefault();
 
-  const title = document.getElementById("title").value;
-  const author = document.getElementById("author").value;
-  const pages = document.getElementById("pages").value;
-  const status = document.getElementById("status").value;
+  let amountOfErrors = 0;
 
-  if (!title || !author || isNaN(pages) || pages <= 0) {
-    alert(`
-      - Title and Author must not be empty
-      - Pages must be a positive number
-    `);
-    return;
+  formFields.forEach((field) => {
+    if (!field.validity.valid) {
+      library.showFormFieldError(field);
+      amountOfErrors++;
+    }
+  });
+
+  if (amountOfErrors === 0) {
+    library.addBook(formFields.map((field) => field.value));
+
+    form.close();
+    library.clearFormFields();
   }
-
-  const newBook = new Book(title, author, Number(pages), status);
-  library.addBook(newBook);
-
-  library.displayBook(newBook);
-  library.updateTableDisplay();
-
-  document.getElementById("title").value = "";
-  document.getElementById("author").value = "";
-  document.getElementById("pages").value = "";
-  document.getElementById("status").value = "To Be Read";
-
-  form.close();
 });
 
 closeStatusFormButton.addEventListener("click", (event) => {

@@ -33,3 +33,17 @@ tr:nth-child(odd) td {
 #showFormButton {
   margin-bottom: 10px;
 }
+
+form div {
+  margin-bottom: 10px;
+}
+
+form span.error {
+  color: #e63946;
+  display: block;
+}
+
+input:invalid,
+select:invalid {
+  border-color: #e63946;
+}

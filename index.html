@@ -27,29 +27,46 @@
     </table>
 
     <dialog id="form">
-      <form>
+      <form novalidate>
         <div>
           <label for="title">Title:</label>
-          <input type="text" id="title" placeholder="The Hobbit" />
+          <input
+            type="text"
+            id="title"
+            placeholder="The Hobbit"
+            minlength="5"
+            required
+          />
+          <span class="error" aria-live="polite"></span>
         </div>
 
         <div>
           <label for="author">Author:</label>
-          <input type="text" id="author" placeholder="J.R.R. Tolkien" />
+          <input
+            type="text"
+            id="author"
+            placeholder="J.R.R. Tolkien"
+            minlength="5"
+            required
+          />
+          <span class="error" aria-live="polite"></span>
         </div>
 
         <div>
           <label for="pages">Pages:</label>
-          <input type="text" id="pages" placeholder="295" />
+          <input type="number" id="pages" placeholder="295" min="1" required />
+          <span class="error" aria-live="polite"></span>
         </div>
 
         <div>
-          <label>Status:</label>
-          <select id="status">
-            <option selected>To Be Read</option>
+          <label for="status">Status:</label>
+          <select id="status" required>
+            <option value="" disabled selected>-- Select a status --</option>
+            <option>To Be Read</option>
             <option>Currently Reading</option>
             <option>Finished Reading</option>
           </select>
+          <span class="error" aria-live="polite"></span>
         </div>
 
         <button id="closeFormButton" autofocus>Close</button>
@@ -61,8 +78,8 @@
       <form>
         <div>
           <label>Status:</label>
-          <select id="newStatus">
-            <option selected>To Be Read</option>
+          <select id="newStatus" required>
+            <option>To Be Read</option>
             <option>Currently Reading</option>
             <option>Finished Reading</option>
           </select>
